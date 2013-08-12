@@ -219,7 +219,7 @@ class PylintQualityReporter(BaseQualityReporter):
     Report Pylint violations.
     """
     COMMAND = 'pylint'
-    OPTIONS = ['--reports=no', '--include-ids=y']
+    OPTIONS = ['--reports=no', '--msg-template="{line}#{C}#{obj}#{msg}"']
 
     EXTENSIONS = ['py']
 
@@ -227,13 +227,17 @@ class PylintQualityReporter(BaseQualityReporter):
         # Take out the first line of the report, which specifies the
         # module name
         lines = output.split('\n')[1:]
-        error_regex = re.compile(r'^([CEFIRW]\d*):\s*(\d+),\d*:(.*$)')
+        error_regex = re.compile(r'(\d+)#([CEFIRW])#(.*)#(.*$)')
         violations = []
         for line in lines:
             try:
                 error_match = error_regex.match(line)
-                error, line_number, message = error_match.groups()
-                violations.append((int(line_number), '{0}: {1}'.format(error, message.strip())))
+                line_number, error, function, message = error_match.groups()
+                function_string = '{}: '.format(function)
+                violations.append((
+                    int(line_number),
+                    '{0}: {1}{2}'.format(error, function_string if function else '', message.strip())
+                ))
             # Pylint prints out the offending source code for certain
             # errors -- just skip them
             except AttributeError:

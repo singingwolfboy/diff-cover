@@ -2,4 +2,4 @@ mock
 nose
 coverage
 pep8
-pylint<1.0
+pylint==1.0
