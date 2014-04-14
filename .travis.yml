@@ -1,11 +1,15 @@
 language: python
 python:
+  - "2.6"
   - "2.7"
-before_install:
-  - git fetch origin master:refs/remotes/origin/master
 install:
-  - "pip install coveralls tox"
-script: 
-  - tox
+  - pip install -r test-requirements.txt
+  - pip install coveralls
+script:
+  - coverage run -m nose
+  - coverage xml
+  - diff-cover coverage.xml
+  - diff-quality --violation=pep8
+  - diff-quality --violation=pylint
 after_success:
   - coveralls
